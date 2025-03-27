@@ -3,9 +3,8 @@ import axios from 'axios'
 import './App.css'
 
 // API URL'sini ortama göre ayarla
-const API_URL = process.env.NODE_ENV === 'production'
-  ? 'https://imza-kampanyasi.vercel.app/api/votes'
-  : 'http://localhost:3000/api/votes';
+const BASE_URL = window.location.origin;
+const API_URL = `${BASE_URL}/api/votes`;
 
 function App() {
   const [imzaSayisi, setImzaSayisi] = useState(0)
@@ -20,15 +19,26 @@ function App() {
     const oyVerileriGetir = async () => {
       try {
         setYukleniyor(true)
-        const response = await axios.get(API_URL)
-        setImzaSayisi(response.data.votes)
-        setKullaniciIP(response.data.clientIP)
-        // IP kontrolü
-        if (response.data.ips.includes(response.data.clientIP)) {
-          setOyKullanildi(true)
+        setHata('')
+        const response = await axios.get(API_URL, {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          }
+        })
+        
+        if (response.data && typeof response.data.votes === 'number') {
+          setImzaSayisi(response.data.votes)
+          setKullaniciIP(response.data.clientIP || 'bilinmiyor')
+          if (response.data.ips && response.data.ips.includes(response.data.clientIP)) {
+            setOyKullanildi(true)
+          }
+        } else {
+          throw new Error('Geçersiz veri formatı')
         }
       } catch (error) {
-        console.error('Oy sayısı alınamadı:', error)
+        console.error('Veri alma hatası:', error)
         setHata('Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.')
       } finally {
         setYukleniyor(false)
@@ -46,11 +56,22 @@ function App() {
 
     try {
       setYukleniyor(true)
-      const response = await axios.post(API_URL)
-      setImzaSayisi(response.data.votes)
-      setOyKullanildi(true)
       setHata('')
+      const response = await axios.post(API_URL, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      })
+      
+      if (response.data && typeof response.data.votes === 'number') {
+        setImzaSayisi(response.data.votes)
+        setOyKullanildi(true)
+      } else {
+        throw new Error('Geçersiz yanıt formatı')
+      }
     } catch (error: any) {
+      console.error('Oy verme hatası:', error)
       if (error.response?.status === 403) {
         setHata('Bu IP adresi zaten oy kullanmış!')
         setOyKullanildi(true)
@@ -93,8 +114,8 @@ function App() {
       </button>
 
       {infoAcik && (
-        <div className="info-modal">
-          <div className="info-content">
+        <div className="info-modal" onClick={() => setInfoAcik(false)}>
+          <div className="info-content" onClick={e => e.stopPropagation()}>
             <p>Bu site, eylemlere destek olmak isteyen ve olamayan bir Türk genci tarafından destek amaçlı oluşturulmuştur.</p>
             <button 
               className="close-button"
