@@ -8,16 +8,12 @@
         "distDir": "dist",
         "buildCommand": "npm run build"
       }
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/votes",
+      "dest": "/api/votes.ts"
     },
     {
       "src": "^/assets/(.*)",
