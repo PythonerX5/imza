@@ -124,6 +124,28 @@
   transform: none;
 }
 
+.support-button.loading {
+  background-color: #888;
+  cursor: wait;
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.support-button.loading {
+  animation: pulse 1.5s infinite;
+}
+
 .info-button {
   position: fixed;
   bottom: 20px;
