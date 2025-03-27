@@ -2,10 +2,6 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
-// API URL'sini ortama göre ayarla
-const BASE_URL = window.location.origin;
-const API_URL = `${BASE_URL}/api/votes`;
-
 function App() {
   const [imzaSayisi, setImzaSayisi] = useState(0)
   const [hata, setHata] = useState('')
@@ -20,7 +16,7 @@ function App() {
       try {
         setYukleniyor(true)
         setHata('')
-        const response = await axios.get(API_URL, {
+        const response = await axios.get('/api/votes', {
           headers: {
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache',
@@ -57,7 +53,7 @@ function App() {
     try {
       setYukleniyor(true)
       setHata('')
-      const response = await axios.post(API_URL, {}, {
+      const response = await axios.post('/api/votes', {}, {
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache'
